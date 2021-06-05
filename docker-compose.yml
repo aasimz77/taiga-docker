@@ -9,7 +9,7 @@ x-environment:
   POSTGRES_HOST: taiga-db
   # Taiga settings
   TAIGA_SECRET_KEY: "taiga-back-secret-key"
-  TAIGA_SITES_DOMAIN: "localhost:9000"
+  TAIGA_SITES_DOMAIN: "trego.trigonsa.net:9000"
   TAIGA_SITES_SCHEME: "http"
   # Email settings. Uncomment following lines and configure your SMTP server
   # EMAIL_BACKEND: "django.core.mail.backends.smtp.EmailBackend"
@@ -84,8 +84,8 @@ services:
   taiga-front:
     image: taigaio/taiga-front:latest
     environment:
-      TAIGA_URL: "http://localhost:9000"
-      TAIGA_WEBSOCKETS_URL: "ws://localhost:9000"
+      TAIGA_URL: "http://trego.trigonsa.net:9000"
+      TAIGA_WEBSOCKETS_URL: "ws://trego.trigonsa.net:9000"
     networks:
       - taiga
     # volumes:
