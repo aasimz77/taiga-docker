@@ -31,7 +31,7 @@ x-volumes:
   &default-back-volumes
   - taiga-static-data:/taiga-back/static
   - taiga-media-data:/taiga-back/media
-    #- ./config.py:/taiga-back/settings/config.py
+  - ./config.py:/taiga-back/settings/config.py
     #- ./conf.json:/taiga-front/dist/config.py
 
 
@@ -90,8 +90,8 @@ services:
       TAIGA_WEBSOCKETS_URL: "ws://trego.trigonsa.net:9000"
     networks:
       - taiga
-        #volumes:
-        # - ./conf.json:/usr/share/nginx/html/conf.json
+    volumes:
+      - ./conf.json:/usr/share/nginx/html/conf.json
 
   taiga-events:
     image: taigaio/taiga-events:latest
