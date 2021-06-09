@@ -1,98 +1,75 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014-present Taiga Agile LLC
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from .common import *
 import os
 
+from .common import *   # noqa, pylint: disable=unused-wildcard-import
 
 #########################################
 ## GENERIC
 #########################################
+
 DEBUG = False
+#SESSION_COOKIE_SECURE = False
+#CSRF_COOKIE_SECURE = False
+
+#ADMINS = (
+#    ("Admin", "example@example.com"),
+#)
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST'),
-        'PORT': os.getenv('POSTGRES_PORT','5432'),
+        'NAME': 'taiga',
+        'USER': 'taiga',
+        'PASSWORD': 'taiga',
+        'HOST': 'taiga-db',
+        'PORT': '',
     }
 }
 
-SECRET_KEY = os.getenv('TAIGA_SECRET_KEY')
-TAIGA_URL = f"{ os.getenv('TAIGA_SITES_SCHEME') }://{ os.getenv('TAIGA_SITES_DOMAIN') }"
+SECRET_KEY = "taiga-back-secret-key"
+TAIGA_URL = "http://trego.trigonsa.net:9000"
 SITES = {
-    "api": {"domain": f"{ os.getenv('TAIGA_SITES_DOMAIN') }", "scheme": f"{ os.getenv('TAIGA_SITES_SCHEME') }", "name": "api"},
-    "front": {"domain": f"{ os.getenv('TAIGA_SITES_DOMAIN') }", "scheme": f"{ os.getenv('TAIGA_SITES_SCHEME') }", "name": "front"}
+    "api": {"domain": "trego.trigonsa.net", "scheme": "http", "name": "api"},
+    "front": {"domain": "trego.trigonsa.net", "scheme": "http", "name": "front"}
 }
-
-INSTANCE_TYPE = "D"
-
-WEBHOOKS_ENABLED = True
 
 # Setting DEFAULT_PROJECT_SLUG_PREFIX to false
 # removes the username from project slug
-DEFAULT_PROJECT_SLUG_PREFIX = os.getenv('DEFAULT_PROJECT_SLUG_PREFIX', 'False') == 'True'
+DEFAULT_PROJECT_SLUG_PREFIX = False
 
 #########################################
-## MEDIA
+## MEDIA AND STATIC
 #########################################
+
+# MEDIA_ROOT = '/home/taiga/media'
 MEDIA_URL = f"{ TAIGA_URL }/media/"
 DEFAULT_FILE_STORAGE = "taiga_contrib_protected.storage.ProtectedFileSystemStorage"
 THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
 
+# STATIC_ROOT = '/home/taiga/static'
 STATIC_URL = f"{ TAIGA_URL }/static/"
-
 
 #########################################
 ## EMAIL
 #########################################
 # https://docs.djangoproject.com/en/3.1/topics/email/
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 CHANGE_NOTIFICATIONS_MIN_INTERVAL = 120  # seconds
 
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'system@taiga.io')
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
-EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
-EMAIL_PORT = os.getenv('EMAIL_PORT', 587)
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'user')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'password')
-
-
-#########################################
-## SESSION
-#########################################
-SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'True') == 'True'
-CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'True') == 'True'
-
+DEFAULT_FROM_EMAIL = 'info@trigonsa.net'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.yandex.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'info@trigonsa.net'
+EMAIL_HOST_PASSWORD = 'Moka@moka7'
 
 #########################################
 ## EVENTS
 #########################################
 EVENTS_PUSH_BACKEND = "taiga.events.backends.rabbitmq.EventsPushBackend"
-
-EVENTS_PUSH_BACKEND_URL = os.getenv('EVENTS_PUSH_BACKEND_URL')
-if not EVENTS_PUSH_BACKEND_URL:
-    EVENTS_PUSH_BACKEND_URL = f"amqp://{ os.getenv('RABBITMQ_USER') }:{ os.getenv('RABBITMQ_PASS') }@taiga-events-rabbitmq:5672/taiga"
-
 EVENTS_PUSH_BACKEND_OPTIONS = {
-    "url": EVENTS_PUSH_BACKEND_URL
+    "url": "amqp://taiga:taiga@taiga-events-rabbitmq:5672/taiga"
 }
 
 
@@ -100,17 +77,15 @@ EVENTS_PUSH_BACKEND_OPTIONS = {
 ## TAIGA ASYNC
 #########################################
 CELERY_ENABLED = os.getenv('CELERY_ENABLED', 'True') == 'True'
+
 from kombu import Queue  # noqa
 
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
-if not CELERY_BROKER_URL:
-    CELERY_BROKER_URL = f"amqp://{ os.getenv('RABBITMQ_USER') }:{ os.getenv('RABBITMQ_PASS') }@taiga-async-rabbitmq:5672/taiga"
-
+CELERY_BROKER_URL = "amqp://taiga:taiga@taiga-async-rabbitmq:5672/taiga"
 CELERY_RESULT_BACKEND = None # for a general installation, we don't need to store the results
 CELERY_ACCEPT_CONTENT = ['pickle', ]  # Values are 'pickle', 'json', 'msgpack' and 'yaml'
 CELERY_TASK_SERIALIZER = "pickle"
 CELERY_RESULT_SERIALIZER = "pickle"
-CELERY_TIMEZONE = 'Europe/Madrid'
+CELERY_TIMEZONE = 'Asia/Riyadh'
 CELERY_TASK_DEFAULT_QUEUE = 'tasks'
 CELERY_QUEUES = (
     Queue('tasks', routing_key='task.#'),
@@ -122,76 +97,119 @@ CELERY_TASK_DEFAULT_ROUTING_KEY = 'task.default'
 
 
 #########################################
-##  REGISTRATION
-#########################################
-PUBLIC_REGISTER_ENABLED = os.getenv('PUBLIC_REGISTER_ENABLED', 'False') == 'True'
-
-
-#########################################
 ## CONTRIBS
 #########################################
-
-# SLACK
-ENABLE_SLACK = os.getenv('ENABLE_SLACK', 'False') == 'True'
-if ENABLE_SLACK:
-    INSTALLED_APPS += [
-        "taiga_contrib_slack"
-    ]
-
-# GITHUB AUTH
-# WARNING: If PUBLIC_REGISTER_ENABLED == False, currently Taiga by default prevents the OAuth
-# buttons to appear for both login and register
-ENABLE_GITHUB_AUTH = os.getenv('ENABLE_GITHUB_AUTH', 'False') == 'True'
-if PUBLIC_REGISTER_ENABLED and ENABLE_GITHUB_AUTH:
-    INSTALLED_APPS += [
-        "taiga_contrib_github_auth"
-    ]
-    GITHUB_API_CLIENT_ID = os.getenv('GITHUB_API_CLIENT_ID')
-    GITHUB_API_CLIENT_SECRET = os.getenv('GITHUB_API_CLIENT_SECRET')
-
-# GITLAB AUTH
-# WARNING: If PUBLIC_REGISTER_ENABLED == False, currently Taiga by default prevents the OAuth
-# buttons to appear for both login and register
-ENABLE_GITLAB_AUTH = os.getenv('ENABLE_GITLAB_AUTH', 'False') == 'True'
-if PUBLIC_REGISTER_ENABLED and ENABLE_GITLAB_AUTH:
-    INSTALLED_APPS += [
-        "taiga_contrib_gitlab_auth"
-    ]
-    GITLAB_API_CLIENT_ID = os.getenv('GITLAB_API_CLIENT_ID')
-    GITLAB_API_CLIENT_SECRET = os.getenv('GITLAB_API_CLIENT_SECRET')
-    GITLAB_URL = os.getenv('GITLAB_URL')
+# INSTALLED_APPS += [
+#     "taiga_contrib_slack",
+#     "taiga_contrib_github_auth",
+#     "taiga_contrib_gitlab_auth"
+# ]
+#
+# GITHUB_API_CLIENT_ID = "changeme"
+# GITHUB_API_CLIENT_SECRET = "changeme"
+#
+# GITLAB_API_CLIENT_ID = "changeme"
+# GITLAB_API_CLIENT_SECRET = "changeme"
+# GITLAB_URL = "changeme"
 
 
 #########################################
 ## TELEMETRY
 #########################################
-ENABLE_TELEMETRY = os.getenv('ENABLE_TELEMETRY', 'True') == 'True'
+
+ENABLE_TELEMETRY = True
+
+#########################################
+##  REGISTRATION
+#########################################
+
+PUBLIC_REGISTER_ENABLED = True
+
+#########################################
+## THROTTLING
+#########################################
+
+#REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+#    "anon-write": "20/min",
+#    "user-write": None,
+#    "anon-read": None,
+#    "user-read": None,
+#    "import-mode": None,
+#    "import-dump-mode": "1/minute",
+#    "create-memberships": None,
+#    "login-fail": None,
+#    "register-success": None,
+#    "user-detail": None,
+#    "user-update": None,
+#}
+
+# This list should contain:
+#  - Taiga users IDs
+#  - Valid clients IP addresses (X-Forwarded-For header)
+#REST_FRAMEWORK["DEFAULT_THROTTLE_WHITELIST"] = []
+
+# LIMIT ALLOWED DOMAINS FOR REGISTER AND INVITE
+# None or [] values in USER_EMAIL_ALLOWED_DOMAINS means allow any domain
+#USER_EMAIL_ALLOWED_DOMAINS = None
+
+# PUCLIC OR PRIVATE NUMBER OF PROJECT PER USER
+#MAX_PRIVATE_PROJECTS_PER_USER = None # None == no limit
+#MAX_PUBLIC_PROJECTS_PER_USER = None # None == no limit
+#MAX_MEMBERSHIPS_PRIVATE_PROJECTS = None # None == no limit
+#MAX_MEMBERSHIPS_PUBLIC_PROJECTS = None # None == no limit
 
 
 #########################################
-##  IMPORTERS
+## SITEMAP
 #########################################
-ENABLE_GITHUB_IMPORTER = os.getenv('ENABLE_GITHUB_IMPORTER', 'False') == 'True'
-if ENABLE_GITHUB_IMPORTER:
-    IMPORTERS["github"] = {
-        "active": True,
-        "client_id": os.getenv('GITHUB_IMPORTER_CLIENT_ID'),
-        "client_secret": os.getenv('GITHUB_IMPORTER_CLIENT_SECRET')
-    }
 
-ENABLE_JIRA_IMPORTER = os.getenv('ENABLE_JIRA_IMPORTER', 'False') == 'True'
-if ENABLE_JIRA_IMPORTER:
-    IMPORTERS["jira"] = {
-        "active": True,
-        "consumer_key": os.getenv('JIRA_IMPORTER_CONSUMER_KEY'),
-        "cert": os.getenv('JIRA_IMPORTER_CERT'),
-        "pub_cert": os.getenv('JIRA_IMPORTER_PUB_CERT')
-    }
+# If is True /front/sitemap.xml show a valid sitemap of taiga-front client
+#FRONT_SITEMAP_ENABLED = False
+#FRONT_SITEMAP_CACHE_TIMEOUT = 24*60*60  # In second
 
-ENABLE_TRELLO_IMPORTER = os.getenv('ENABLE_TRELLO_IMPORTER', 'False') == 'True'
-if ENABLE_TRELLO_IMPORTER:
-    IMPORTERS["trello"] = {
-        "active": True,
-        "api_key": os.getenv('TRELLO_IMPORTER_API_KEY'),
-        "secret_key": os.getenv('TRELLO_IMPORTER_SECRET_KEY')
-    }
+
+#########################################
+## FEEDBACK
+#########################################
+
+# Note: See config in taiga-front too
+#FEEDBACK_ENABLED = True
+#FEEDBACK_EMAIL = "support@taiga.io"
+
+
+#########################################
+## STATS
+#########################################
+
+#STATS_ENABLED = False
+#STATS_CACHE_TIMEOUT = 60*60  # In second
+
+
+#########################################
+## IMPORTERS
+#########################################
+
+# Configuration for the GitHub importer
+# Remember to enable it in the front client too.
+#IMPORTERS["github"] = {
+#    "active": True,
+#    "client_id": "XXXXXX_get_a_valid_client_id_from_github_XXXXXX",
+#    "client_secret": "XXXXXX_get_a_valid_client_secret_from_github_XXXXXX"
+#}
+
+# Configuration for the Trello importer
+# Remember to enable it in the front client too.
+IMPORTERS["trello"] = {
+    "active": True, # Enable or disable the importer
+    "api_key": "3be725de57354f3838ddff9b7e3c389d",
+    "secret_key": "39d79b9b658974b8dffeea62e4d181f3d2a865eac62b6003c65e3e68475e4bd2"
+}
+
+# Configuration for the Jira importer
+# Remember to enable it in the front client too.
+#IMPORTERS["jira"] = {
+#    "active": True, # Enable or disable the importer
+#    "consumer_key": "XXXXXX_get_a_valid_consumer_key_from_jira_XXXXXX",
+#    "cert": "XXXXXX_get_a_valid_cert_from_jira_XXXXXX",
+#    "pub_cert": "XXXXXX_get_a_valid_pub_cert_from_jira_XXXXXX"
+#}

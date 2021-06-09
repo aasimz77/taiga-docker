@@ -12,14 +12,14 @@ x-environment:
   TAIGA_SITES_DOMAIN: "trego.trigonsa.net:9000"
   TAIGA_SITES_SCHEME: "http"
   # Email settings. Uncomment following lines and configure your SMTP server
-  EMAIL_BACKEND: "django.core.mail.backends.smtp.EmailBackend"
-  DEFAULT_FROM_EMAIL: "info@trigonsa.net"
-  EMAIL_USE_TLS: "True"
-  EMAIL_USE_SSL: "True"
-  EMAIL_HOST: "smtp.yandex.com"
-  EMAIL_PORT: 465
-  EMAIL_HOST_USER: "info@trigonsa.net"
-  EMAIL_HOST_PASSWORD: "Moka@moka7"
+  # EMAIL_BACKEND: "django.core.mail.backends.smtp.EmailBackend"
+  # DEFAULT_FROM_EMAIL: "no-reply@example.com"
+  # EMAIL_USE_TLS: "False"
+  # EMAIL_USE_SSL: "False"
+  # EMAIL_HOST: "smtp.yandex.com"
+  # EMAIL_PORT: 587
+  # EMAIL_HOST_USER: "info@trigonsa.net"
+  # EMAIL_HOST_PASSWORD: "password"
   # Rabbitmq settings
   # Should be the same as in taiga-async-rabbitmq and taiga-events-rabbitmq
   RABBITMQ_USER: taiga
@@ -32,7 +32,6 @@ x-volumes:
   - taiga-static-data:/taiga-back/static
   - taiga-media-data:/taiga-back/media
   - ./config.py:/taiga-back/settings/config.py
-    #- ./conf.json:/taiga-front/dist/config.py
 
 
 services:
@@ -51,7 +50,6 @@ services:
     image: taigaio/taiga-back:latest
     environment: *default-back-environment
     volumes: *default-back-volumes
-
     networks:
       - taiga
     depends_on:
